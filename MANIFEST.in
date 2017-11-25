@@ -1,0 +1,6 @@
+recursive-include cavecalc *.dat
+recursive-include examples *.py
+recursive-exclude development_tests *.py
+
+include readme.txt
+include manual.pdf

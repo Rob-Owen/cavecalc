@@ -1,0 +1,20 @@
+# distribution directories
+build/
+sdist/
+dist/
+eggs/
+*.eggs/
+*.egg-info/
+__pycache__/
+
+# compiled python files
+*.py[cod]
+
+# cavecalc test outputs
+*.csv
+*.phr
+*.pho
+*.pkl
+*.sel
+*.out
+*.inp
