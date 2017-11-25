@@ -1,7 +1,7 @@
 # distribution directories
 build/
 sdist/
-dist/
+# dist/
 eggs/
 *.eggs/
 *.egg-info/
