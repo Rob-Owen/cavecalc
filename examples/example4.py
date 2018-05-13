@@ -52,12 +52,12 @@ for m_bedrock in [0, 1e-5, 1e-3]: # three values for m (moles of bedrock)
     sim.ipq_buffer(*water.open_diss_rxn( bedrock ))
     sim.ipq_exec()    #    Calculate bedrock dissolution product
 
-    # Now do an interative degassing loop until 'degas_pCO2' is reached.
-    while water.will_it_degas( sim.settings['degas_pCO2'] ):
+    # Now do an interative degassing loop until 'cave_pCO2' is reached.
+    while water.will_it_degas( sim.settings['cave_pCO2'] ):
         # on each loop, add 3 reactions to the buffer.
         # water.wri_rxn is the one not used in the standard 'eq' mode
         sim.ipq_buffer([ water.wri_rxn(bedrock, m_bedrock=m_bedrock),
-                         water.degas_rxn(),
+                         water.kinetic_degas_rxn(),
                          water.precipitate_rxn() 
                        ])
         sim.ipq_exec()
