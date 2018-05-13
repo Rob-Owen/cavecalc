@@ -55,7 +55,7 @@ cave_air_volume =      0
 
 # General
 temperature =          20     # Temperature in degrees celsius
-kinetics_mode =        'closed_system_rayleigh'    # Specifies how to run the model (see types_and_limits.py for options)
+kinetics_mode =        'multi_step_degassing'    # Specifies how to run the model (see types_and_limits.py for options)
 
 # Scripting Options
 co2_decrement =        0.5    # Fraction of CO2(aq) removed on each degassing step

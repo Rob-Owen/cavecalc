@@ -33,8 +33,9 @@ if sys.platform == 'win32':
     MODE = 'API_com'
 else:
     MODE = 'phreeqpy_dll'
-
+    
 # edit MODE here to force behaviour
+MODE = 'phreeqpy_dll'
 
 if MODE == 'phreeqpy_com':
     import phreeqpy.iphreeqc.phreeqc_com as phreeqc_mod
@@ -48,7 +49,7 @@ else:
 # Global parameters
 EQ_STEP = True                      #   run initial isotope equilibration step
 PHREEQC_TOLERANCE = 0.1             #   tolerance on phreeqc percent error
-PRESSURE = 1.001                    #   atmospheric pressure (bar)
+PRESSURE =  1.001                   #   atmospheric pressure (bar)
 BEDROCK_PHASE_QZ_LEVEL = 1e-10      #   precision of bedrock phase declaration
 
 # Class definitions
@@ -390,7 +391,7 @@ class Solution(object):
             (pq_str, desc_str) for adding to the iphreeqc buffer.
         """
         
-        if Gas is None:
+        if EqGas is None:
             EqGas = Gas(Sim=self.s)
             EqGas.set_cave_air()
             
@@ -1149,7 +1150,8 @@ class Simulator(object):
         ## correct bulk solution R14C for isotope fractionation
         # Some studies use uncorrected a14C (e.g. Genty et al. (1997)), some
         # corrected (e.g. Noronha et al. (2014)). Usually it should be
-        # corrected.
+        # corrected. Note this was disabled in thesis work for like-for-like
+        # comparison with Fohlmeister et al. (2011).
         new = []
         for c13,c14 in zip(out['I_R(13C)'], out['I_R(14C)']):
             pmc = ccu.pmc_normalise(  R14C=c14,   
@@ -1198,7 +1200,7 @@ class Simulator(object):
                     f_name = 'libiphreeqc.so.0.0.0'
                 elif sys.platform == 'win32': # windows
                     f_name = 'IPhreeqc.dll'
-                else: # assumed mac
+                else: # mac (presumably)
                     f_name = 'libiphreeqc.0.dylib'
                 try:
                     self.phreeqc = phreeqc_mod.IPhreeqc(dll_path = 
@@ -1344,21 +1346,21 @@ class Simulator(object):
         
         ## From here, behaviour depends on the run mode / kinetics_mode
         # kinetics mode options: 
-        #   closed_system_rayleigh
-        #   open_system_single_step
+        #   multi_step_degassing
+        #   single_step_degassing
         #   allow_supersaturation
         #   allow_supersaturation_max
         #   degas_only
         #   dissolve_only
         
-        # closed_system_rayleigh
-        if self.settings['kinetics_mode'] == 'closed_system_rayleigh': # keep at SI_calcite = 0
+        # multi_step_degassing
+        if self.settings['kinetics_mode'] == 'multi_step_degassing': # keep at SI_calcite = 0
             while water.will_it_degas(self.settings['cave_pCO2']):
                 self.ipq_buffer( [water.kinetic_degas_rxn(), water.precipitate_rxn()] )
                 self.ipq_exec()
 
-        # open_system_single_step
-        elif self.settings['kinetics_mode'] == 'open_system_single_step':
+        # single_step_degassing
+        elif self.settings['kinetics_mode'] == 'single_step_degassing':
             self.ipq_buffer( [water.eq_degas_rxn(), water.precipitate_rxn()] )
             self.ipq_exec()
                 

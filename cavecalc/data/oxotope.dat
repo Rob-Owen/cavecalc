@@ -1,6 +1,3 @@
-# This database file is modified from iso.dat, a standard PHREEQC database
-# published by the USGS. Modifications made are clearly commented.
-
 SOLUTION_MASTER_SPECIES
 E            e-             0       0               0.0
 H            H3O+           -1      H               1.008
@@ -7271,7 +7268,7 @@ NDT2(g)
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
-## Cavecalc additions begin here
+
 #  Begin Ca isotope definitions
 #
 ###############################################################################################

@@ -377,7 +377,7 @@ class CCInputGUI(object):
         F1 = Frame(self.master)
         Label(F1, text='Geochemical Inputs').grid(row=0,columnspan=3)
         i = 1
-        i = add_things_to_frame(F1, 10, 'Atmospheric Gas End-member', i)
+        i = add_things_to_frame(F1, 10, 'Second Gas End-member', i)
         i = add_things_to_frame(F1, 11, 'Soil Gas End-member', i)
         i = add_things_to_frame(F1, 12, 'Mixed Gas', i)
         i = add_things_to_frame(F1, 17, 'Cave Air', i)
@@ -567,11 +567,13 @@ class PlottingWindow(Toplevel):
         return OptionMenu(self, v, *sorted(opt)), v
     
     def PlotButton(self):
+
         b = Button(self, text='Plot Graph', 
                     command = lambda : self.plot())
         return b
         
     def plot(self):
+    
         if self.v.get() == 1:
             a = self.e.filter_by_index(ind=0, n=True)
         elif self.v.get() == 2:
@@ -580,6 +582,8 @@ class PlottingWindow(Toplevel):
             a = self.e.filter_by_index(ind=-1)
         elif self.v.get() == 4:
             a = self.e.filter_by_results('step_desc', 'precip')
+            
+            
         else:
             a = copy.deepcopy(self.e)
            
@@ -604,4 +608,4 @@ class PlottingWindow(Toplevel):
         
 if __name__ == '__main__':
     CCInputGUI()
-    CCAnalyseGUI()
+    # CCAnalyseGUI()

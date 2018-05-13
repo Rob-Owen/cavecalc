@@ -1,7 +1,7 @@
 """Codes locations and type of each parameter in the GUI input panel.
 
     0: Hidden
-    10: Geochem: Atmospheric End-Member
+    10: Geochem: Second Gas End-Member
     11: Geochem: Soil End-Member
     12: Geochem: Soil gas mixing
     13: Geochem: Bedrock chemistry

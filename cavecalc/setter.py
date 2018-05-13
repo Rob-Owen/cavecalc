@@ -422,5 +422,19 @@ class SettingsMaker(object):
         return copy.deepcopy(self.o)
  
 if __name__ == '__main__': # testing code
+    # a = SettingsObject()
+    # b = SettingsObject()
+    # print("Equal?" + '\t' + str(a.equals(a)))
+    # print("Equal?" + '\t' + str(a.equals(b)))
+    # a.set(temperature=35)
+    # print("Equal?" + '\t' + str(a.equals(b)))
+    # print(a.get('temperature'))
+    
+    # n = NameSwitcher()
+    # print(n('temperature'))
+    
     a = SettingsMaker(temperature=[15, 20], soil_pCO2=[2222, 3333])
     a.print_report()
+    a = SettingsMaker()
+    
+    
