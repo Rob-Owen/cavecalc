@@ -1431,11 +1431,11 @@ Log_alpha_14C_CO2(g)/CO2(aq)
     
 #
 # CO2-Calcite fractionation factors
-# Updated 01/06/2016 (R. Owen)
+# Updated 01/06/2018 (C. Day)
 #
-Log_alpha_18O_Calcite/H2O(l)           # 1000ln(alpha(25C)) = 29.76
-    # Coplen et al. (2007)
-    -ln_alpha1000    -28.6     0   17.4e3
+Log_alpha_18O_Calcite/H2O(l)           # 1000ln(alpha(25C)) = 28.05
+    # Kim and O'Neil (1997)
+    -ln_alpha1000    -32.42     0   18.03e3
     
 Log_alpha_18O_Calcite/CO2(aq)
     -add_logk    Log_alpha_18O_Calcite/H2O(l)   1
