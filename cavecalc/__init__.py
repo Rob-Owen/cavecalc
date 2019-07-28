@@ -29,3 +29,4 @@ import cavecalc.setter
 import cavecalc.util
 import cavecalc.forward_models
 import cavecalc.analyse
+import cavecalc.configuration

@@ -1,0 +1,50 @@
+Name,DisplayName,DataType,NumericMin,NumericMax,AllowedStrings,Value
+database,PHREEQC Database Filename ,str,,,,oxotope.dat
+phreeqc_log_file,Log PHREEQC input,bool,,,,FALSE
+phreeqc_log_file_name,PHREEQC Log Filename,str,,,,log_{}.phr 
+out_dir,Output Directory,str,,,,
+temperature,Temperature (Degrees C),numeric,-273.15,,,20
+co2_decrement,CO2(g) removal per step (fraction),numeric,0,1,,0.5
+calcite_sat_limit,Calcite supersaturation limit (SI),numeric,0,,,1
+bedrock,Bedrock (moles),numeric,0,,,10
+bedrock_mineral,Bedrock Lithology,str,,,"Calcite, Dolomite",Calcite
+bedrock_pyrite,Bedrock Pyrite (moles),numeric,0,,,0
+bedrock_d44Ca,Bedrock d44Ca (per mil),numeric,,,,0
+bedrock_d13C,Bedrock d13C (per mil),numeric,,,,0
+bedrock_d18O,Bedrock d18O (per mil),numeric,,,,0
+bedrock_MgCa,Bedrock Mg/Ca (mmol/mol),numeric,0,,,0
+bedrock_SrCa,Bedrock Sr/Ca (mmol/mol),numeric,0,,,0
+bedrock_BaCa,Bedrock Ba/Ca (mmol/mol),numeric,0,,,0
+atmo_exchange,Second Gas Fraction (0-1),numeric,0,1,,0
+gas_volume,Gas Volume (L),numeric,0,,,10
+atm_O2,Second Gas O2 (%),numeric,0,100,,0.21
+atm_pCO2,Second Gas pCO2 (ppmv),numeric,0,,,270
+atm_d13C,Second Gas d13C (per mil),numeric,,,,-7
+atm_R14C,Second Gas R14C (pmc),numeric,0,,,100
+atm_d18O,Rainfall d18O (per mil),numeric,,,,-10
+cave_O2,,numeric,0,100,,0.21
+cave_pCO2,,numeric,0,,,1000
+cave_d13C,,numeric,,,,-10
+cave_R14C,,numeric,0,,,100
+cave_d18O,,numeric,,,,0
+cave_air_volume,,numeric,0,,,0
+init_O2,Initial O2 (%),numeric,0,100,"soil, atm, mix",mix
+init_pCO2,Initial pCO2 (ppmv),numeric,0,,"soil, atm, mix",mix
+init_d13C,Initial d13C (per mil),numeric,,,"soil, atm, mix",mix
+init_R14C,Initial R14C (pmc),numeric,0,,"soil, atm, mix",mix
+init_solution_d13c,Initial Solution d13C (per mil) – OVERRIDE,numeric,,,n/a,n/a
+soil_O2,Soil Gas O2 (%),numeric,0,100,,0
+soil_pH,Soil pH (approx.),numeric,0,14,,4
+soil_pCO2,Soil Gas pCO2 (ppmv),numeric,0,,,20000
+soil_Ca,Soil Ca (mmol/kgw),numeric,0,,,0
+soil_Mg,Soil Mg (mmol/kgw),numeric,0,,,0
+soil_Sr,Soil Sr (mmol/kgw),numeric,0,,,0
+soil_Ba,Soil Ba (mmol/kgw),numeric,0,,,0
+soil_d13C,Soil Gas d13C (per mil),numeric,,,,-25
+soil_R14C,Soil Gas R14C (pmc),numeric,0,,,100
+soil_d44Ca,Soil d44Ca (per mil),numeric,,,,0
+kinetics_mode,Degassing/Precipitation Mode,str,,,"multi_step_degassing, single_step_degassing, allow_supersaturation, allow_supersaturation_max, degas_only, diss_only",multi_step_degassing
+reprecip,Allow Calcite Reprecipitation,bool,,,,FALSE
+totals,Totals,str,,,,
+molalities,Molalities,str,,,,"""HCO3- CO3-2"""
+isotopes,Isotopes,str,,,,"""R(44Ca) R(18O) R(13C) R(18O)_HCO3- R(13C)_HCO3- R(18O)_CO3-2 R(13C)_CO3-2 R(44Ca)_Calcite R(18O)_Calcite R(13C)_Calcite"""
