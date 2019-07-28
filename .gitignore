@@ -15,7 +15,6 @@ venv/
 *.py[cod]
 
 # cavecalc test outputs
-*.csv
 *.phr
 *.pho
 *.pkl
