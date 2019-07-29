@@ -6,6 +6,7 @@ eggs/
 *.eggs/
 *.egg-info/
 __pycache__/
+*.egg
 
 # Virtual environment locations
 venvs/
