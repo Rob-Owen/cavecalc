@@ -19,7 +19,8 @@ import numpy as np
 from decimal import *
 import cavecalc.util as ccu
 from cavecalc.data.phreeqc_templates import *
-from cavecalc.setter import SettingsObject
+import cavecalc.data
+from cavecalc.configuration import RunConfig
 from copy import copy, deepcopy
 import inflection
 
@@ -35,7 +36,7 @@ else:
     MODE = 'phreeqpy_dll'
     
 # edit MODE here to force behaviour
-MODE = 'phreeqpy_dll'
+#MODE = 'phreeqpy_dll'
 
 if MODE == 'phreeqpy_com':
     import phreeqpy.iphreeqc.phreeqc_com as phreeqc_mod
@@ -185,7 +186,7 @@ class Solution(object):
         # create a dummy PHREEQC solution in a new Simulator to calculate C and
         # O concentrations in initial solution
         dummy_chemistry = DUMMY_CHEM_CO.format(**fmt)
-        dummy_settings = self.s.settings.copy()
+        dummy_settings = deepcopy(self.s.settings)
         dummy_settings['phreeqc_log_file_name'] = 'log_{}_init.phr'
         dummy_simulator = Simulator(dummy_settings, self.s.id)
         dummy_simulator.ipq_buffer(dummy_chemistry, 'Calculate init C/O concs')
@@ -239,7 +240,7 @@ class Solution(object):
 
         dummy_gas = (gas, 'equilibrate with high vol gas /w correct d13C')
         
-        dummy_settings = self.s.settings.copy()
+        dummy_settings = deepcopy(self.s.settings)
         dummy_settings['phreeqc_log_file_name'] = 'log_{}_d13c.phr'
         dummy_simulator = Simulator(dummy_settings, self.s.id)
         
@@ -1024,26 +1025,22 @@ class Simulator(object):
         
     """
     
-    def __init__(self, settings, id=0):     
+    def __init__(self, config: RunConfig = None, id=0):     
         """Initialises an IPhreeqc session.
         
         Initalising a Simulator object sets up an IPhreeqc session, parses
         the settings provided and initialises various utility objects.
         
         Args:
-            settings (dict): Contains model settings. This dict should be
-                generated using setter.py.
+            config (RunConfig): See cavecalc.configuration.
             id (int): Id number for the model being run.
         """                
 
-        if type(settings) is not dict:
-            try: 
-                settings = settings.dict()
-            except:
-                raise TypeError("Settings arg must be of type dict.")
+        if not config:
+            config = RunConfig.default()
             
-        self.settings = deepcopy(settings)         # will be updated and used
-        self.settings_archive = deepcopy(settings) # will not be changed
+        self.settings = deepcopy(config)         # will be updated and used
+        self.settings_archive = deepcopy(config) # will not be changed
         self.id = id
         
         # set up input log if requested
@@ -1221,8 +1218,16 @@ class Simulator(object):
                     raise Exception("IPhreeqc failed to load. Ensure " + \
                     "IPhreeqcCOM is installed correctly.")
                     
-            # IPhreeqc is now initialised. Load the database:
-            self._call_iphreeqc('load_database',self.settings['database'])
+            # IPhreeqc is now initialised. Load the database
+            db_setting = self.settings['database']
+            if os.path.isabs(db_setting):
+                db_path = db_setting
+            else:
+                db_path = os.path.join(
+                    os.path.dirname(cavecalc.data.__file__), db_setting
+                )
+                
+            self._call_iphreeqc('load_database', db_path)
          
         if 'phreeqpy' in MODE:
             c = inflection.underscore(command)

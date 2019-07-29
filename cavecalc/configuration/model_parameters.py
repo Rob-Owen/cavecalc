@@ -5,6 +5,8 @@ from typing import List, Set, Dict
 from copy import deepcopy
 from enum import Enum
 
+from cavecalc.file_utilities import read_config_from_csv
+
 default_parameters_file = 'model_parameters.csv'
 file_directory = os.path.dirname(__file__)
 default_filepath = os.path.join(file_directory, default_parameters_file)
@@ -19,28 +21,60 @@ class ParameterTypes(Enum):
     def supported_types(cls) -> Set[str]:
         return set(i.value for i in cls)
 
-
 @dataclass
 class ModelParameter:
     """
     A single model parameter. Typically created by the read_parameters_file
     function.
     """
-    # field names must match header names in the parameters file
     Name: str
     DisplayName: str
     DataType: str
     NumericMin: str
     NumericMax: str
     AllowedStrings: str
-    Value: str
+    _Value: str
 
-    def update(self, newValue):
-        self._validate(newValue)
-        self.Value = newValue
+    # Manually define __init__ because the dataclass generated one doesn't
+    # play well with the property & backing field (_Value).
+    def __init__(self, Name: str, DisplayName: str, DataType: str,
+        NumericMin: str, NumericMax: str, AllowedStrings: str, Value: str):
+        self.Name = Name
+        self.DisplayName = DisplayName
+        self.DataType = DataType
+        self.NumericMin = NumericMin
+        self.NumericMax = NumericMax
+        self.AllowedStrings = AllowedStrings
+        self._Value = Value
+
+    def __post_init__(self):
+        self._validate()
+
+    # Correctly type parameters when called.
+    @property
+    def Value(self):
+        if self._is_value_special_input():
+            return self._Value
+        elif self.DataType == ParameterTypes.STRING.value:
+            return self._Value
+        elif self.DataType == ParameterTypes.NUMERIC.value:
+            return float(self._Value)
+        elif self.DataType == ParameterTypes.BOOLEAN.value:
+            return bool(self._Value)
+        else:
+            raise TypeError("Unsupported CaveCalc data type.")
+
+    # Values are stored as strings to match source data
+    @Value.setter
+    def Value(self, newValue: str):
+        self._validate(str(newValue))
+        self._Value = str(newValue)
+
+    def to_dict(self):
+        return {f:v for f, v in vars(self) if '__' not in f}
 
     def _is_value_special_input(self) -> bool:
-        return self.Value in self._split_allowed_strings()
+        return self._Value in self._split_allowed_strings()
 
     def _split_allowed_strings(self) -> List[str]:
         return [a.strip() for a in self.AllowedStrings.split(',')]
@@ -48,7 +82,7 @@ class ModelParameter:
     def _validate(self, value: str = None):
 
         if value is None:
-            value = self.Value
+            value = self._Value
 
         # Checks on string inputs
         if self.DataType == ParameterTypes.STRING.value:
@@ -93,13 +127,5 @@ class ModelParameter:
             raise ValueError(f"Parameter '{self.Name}' has unrecognised type: {self.DataType}.")
 
 def read_parameters_file(filepath: str = default_filepath) -> List[ModelParameter]:
-    with open(filepath, 'r') as csvfile:
-        rows = [r for r in csv.reader(csvfile, delimiter=',', quotechar="\"")]
-
-    header_row, param_rows = rows[0], rows[1:]
-    params = [ModelParameter(**dict(zip(header_row, r))) for r in param_rows]
-
-    for p in params:
-        p._validate()
-
-    return params
+    params = read_config_from_csv(filepath)
+    return [ModelParameter(**p) for p in params]

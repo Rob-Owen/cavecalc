@@ -14,13 +14,14 @@ Functions defined here:
 import os
 import multiprocessing as mp
 import pickle
+from typing import List
 # my modules
 import cavecalc.caves as ccv
 import cavecalc.util as ccu
-from cavecalc.setter import SettingsObject, SettingsMaker
+from cavecalc.configuration import RunConfig
 from copy import deepcopy
 
-def run_a_model(SO):
+def run_a_model(config: RunConfig):
     """Run a single cavecalc model.
     
     Args:
@@ -31,7 +32,7 @@ def run_a_model(SO):
     """
     
     i = SO.id
-    sim = ccv.Simulator(SO.dict(), i)
+    sim = ccv.Simulator(config, i)
     r = sim.run()
     print("Model %i complete." % i)
     return (r, i)
@@ -59,7 +60,7 @@ def run_async(SO_list):
     r2 = sorted(r, key=lambda tup: tup[1]) # sort by model id
     return r2
     
-def run_linear(SO_list):
+def run_linear(configs: List[RunConfig]):
     """Runs multiple models in sequence.
     
     Args:
@@ -69,9 +70,9 @@ def run_linear(SO_list):
         'id' parameter in the settings dict.
     """    
     
-    return [run_a_model(e) for e in SO_list]
+    return [run_a_model(e) for e in configs]
 
-class ForwardModels(object):
+class ForwardModels:
     """Runs Cavecalc models.
     
     Handles generation and checking of settings suites, and saving of bundled
@@ -80,14 +81,12 @@ class ForwardModels(object):
     of running models.
     """
     
-    def __init__(self, settings=None, output_dir=None):
+    def __init__(self, settings={}, output_dir=None):
         """Initialise the object and process settings.
         
         Args:
-            settings (SO): Model input parameters. See defaults.txt for 
+            settings: Model input parameters. See defaults.txt for 
                              options.
-            settings_file: If no settings arg is given, settings may be loaded
-                           from a file.
             output_dir: (Optional) Specify path to directory for saving files.
                         By default files are saved to the current directory.
         """
@@ -95,11 +94,9 @@ class ForwardModels(object):
         self.done_input = []
         self.done_results = []
         
-        # Get settings objects
-        if settings:    self.input = SettingsMaker(**settings).settings()
-        else:           self.input = SettingsMaker().settings()
-            
-        if output_dir:  
+        self.input = list(RunConfig.generate_suite(**settings))
+
+        if output_dir:
             if not os.path.isdir(output_dir): 
                 os.mkdir(output_dir)
             self.output_dir = output_dir

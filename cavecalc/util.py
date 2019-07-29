@@ -13,7 +13,6 @@ import re
 from collections import OrderedDict
 from copy import copy
 import numpy as np
-import scipy.io as sio
 import cavecalc.data
 
 class DBReader(object):
@@ -577,98 +576,3 @@ def output_filter(src, key, value):
     for k, v in src.items():
         o[k] = [a for i,a in enumerate(v) if i in inds]
     return o
-    
-def matlab_header_parse(dictionary):
-    """Remove illegal characters from dictionary keys.
-    
-    To transfer data to matlab, certain characters are not allowed in field / 
-    array names (e.g. brackets, hypens). This function removes these characters
-    in preparation for writing dicts (of numpy arrays) to a .mat file.
-    
-    Args:
-        dictionary: A dict
-    Returns:
-        A dict with modified key names
-    """
-    
-    b = {}
-    for k in dictionary:
-        new_k = k.replace(')', '') # because matlab is fussy
-        new_k = new_k.replace('(','_') # about variable names
-        new_k = new_k.replace('-','') # and does not allow these
-        new_k = new_k.replace('/','') # characters
-        new_k = new_k.replace('[','')
-        new_k = new_k.replace(']','')    
-        
-        b[new_k] = dictionary[k]
-    return b
-    
-def numpify(dictionary):
-    """Prepare a dict of lists for writing to a .mat file.
-    
-    Convert the dict of lists to a dict of numpy arrays. Dict keys are edited
-    if they contain matlab-illegal characters. Lists in the dict are converted
-    to numpy arrays.
-    
-    Args:
-        dictionary: A dict of lists. Each list should be composed of a single
-            type.
-    Returns:
-        A modified dict, ready for writing to a .mat file.    
-    """
-    
-    a = matlab_header_parse(dictionary)
-    b = {}
-    for k in a:
-        if k == "step_desc":
-            b[k] = np.asarray( a[k], order='F' )
-        else:
-            b[k] = np.asarray( a[k], order='F' )    
-    return b
-            
-def save_mat(dict_of_lists, filename):
-    """Save data to a .mat file for use with Matlab/Octave.
-    
-    Takes a dict of lists (e.g. model results) and saves them to a .mat file.
-    Data are prepared for saving using the numpify() function.
-    
-    Args:
-        dict_of_lists: Data to be saved for Matlab use.
-    """
-        
-    out = numpify(dict_of_lists)
-    sio.savemat( filename, out )
-
-def save_pkl(data, filename):
-    """Save data to a .pkl file for use with Python.
-    
-    Args:
-        data: a pickle-able Python object.
-        filename: Output file name/location.
-    """
-    
-    with open(filename,'wb') as f:
-        pickle.dump( data, f)
-            
-def save_csv(dictionary, filename):
-    """Save data to a .csv file.
-
-    For saving data to view in for use with other programs (e.g. Excel). Data
-    should be provided as a dict of lists. Dict keys give column headers and
-    lists give column values. All lists must be of equal length.
-    
-    In the resulting .csv, columnns are arranged alphabetically by header.
-    
-    Args:
-        dictionary: The dictionary to write to file.
-    """
-    
-    r = OrderedDict(sorted(dictionary.items()))
-    a, b = zip(*[(k,v) for (k,v) in r.items()])
-    c = zip(*b)
-    
-    with open(filename,'w', newline='') as f:
-        writer = csv.writer(f,dialect='excel')
-        writer.writerow(a)
-        for row in c:
-            writer.writerow(row)
