@@ -63,12 +63,18 @@ class ModelParameter:
             except ValueError:
                 raise ValueError(f"Numeric parameter '{self.Name}' has invalid min and/or max values." +
                     " Min/Max values should be numeric or blank.")
-            
+
             try:
                 float(value)
             except ValueError:
                 if not self._is_value_special_input():
                     raise ValueError(f"Parameter '{self.Name}' default value is invalid.")
+                    
+            if not self._is_value_special_input():
+                if self.NumericMin and float(value) < float(self.NumericMin):
+                    raise ValueError(f"Parameter '{self.Name}' value ({value}) is below minimum ({self.NumericMin}).")
+                if self.NumericMax and float(value) > float(self.NumericMax):
+                    raise ValueError(f"Parameter '{self.Name}' value ({value}) is above maximum ({self.NumericMax}).")
 
         # Checks on boolean types
         elif self.DataType == ParameterTypes.BOOLEAN.value:
@@ -114,7 +120,7 @@ class RunConfig:
     @property
     def values(self) -> Dict[str, str]:
         self._validate()
-        return {k: p.Name for k, p in self.params.items()}
+        return {k: p.Value for k, p in self.params.items()}
 
     def update(self, name: str, value: str):
         self._params[name].update(value)
@@ -122,9 +128,9 @@ class RunConfig:
     def generate_suite(self, **kwargs):
         default_config = self.default()
 
-        max_len = max(len(list(o) for o in kwargs.values()))
+        max_len = max(len(o) for o in kwargs.values() if type(o) is list)
         for v in kwargs.values():
-            if len(list(v)) not in (1, max_len):
+            if type(v) is list and len(v) != max_len:
                 raise ValueError("All inputs must be of equal length.")
 
         base_configs = (deepcopy(default_config) for _ in range(max_len))
