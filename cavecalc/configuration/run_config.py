@@ -115,10 +115,26 @@ class RunConfig:
         return deepcopy({k: p.Value for k, p in self.params.items()})
 
     def write_to_csv(self, filepath: str):
-        return write_config_to_csv([p.to_dict() for p in self.params.values()], filepath)
+        return write_config_to_csv([p.print_format() for p in self.params.values()], filepath)
         
     def _validate(self) -> None:
         # validation of ModelParameters is handled by that class.
         # Here it is sufficient to validate we have all the necessary entries.
         if set(self._params.keys()) != self.required_params:
             raise ValueError(f"Run Config does not have the correct parameters")
+
+    def __eq__(self, other: 'RunConfig') -> bool:
+        """Two RunConfigs are equal if they contain all the same ModelParameters
+        """
+        if set(self._params.keys()) != set(other._params.keys()):
+            return False
+
+        for p1 in self._params.values():
+            if p1 not in other._params.values():
+                return False
+
+        for p2 in other._params.values():
+            if p2 not in self._params.values():
+                return False
+        
+        return True

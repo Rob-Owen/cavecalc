@@ -17,10 +17,12 @@ import math
 import re
 import numpy as np
 from decimal import *
-import cavecalc.util as ccu
+from typing import Dict
+from cavecalc.chemistry.radiocarbon import *
 from cavecalc.data.phreeqc_templates import *
-import cavecalc.data
 from cavecalc.configuration import RunConfig
+import cavecalc.data
+import cavecalc.util as ccu
 from copy import copy, deepcopy
 import inflection
 
@@ -270,8 +272,8 @@ class Solution(object):
         """
         
         # get initial chemistry parameters (assume Cl- for charge balance)
-        init_r14c = ccu.pmc_denormalise(   self.s.settings['init_R14C'], 
-                                           self.init_13c_aq    )
+        init_r14c = pmc_denormalise(   self.s.settings['init_R14C'], 
+                                        self.init_13c_aq    )
         
         fmt = { 'temp'  :   self.s.settings['temperature'],
                 'ph'    :   self.init_pH,
@@ -872,7 +874,7 @@ class Gas(object):
         
         r13 = s13C * (1 + 0.001 * d13C) # 13C/12C ratio
         r18 = s18O * (1 + 0.001 * d18O) # 18O/16O ratio
-        r14 = ccu.pmc_2_c14(R14C, d13C, self.s.stnd14C)
+        r14 = pmc_2_c14(R14C, d13C, self.s.stnd14C)
         
         # r14 = s14C * 0.01 * R14C * math.pow((1+0.001*float(d13C))/0.975,2)
         # mole fraction 14C
@@ -996,8 +998,8 @@ class Gas(object):
         m_13c = (f1*a[1] + f2*b[1]) / mix_pco2
         m_14c = (f1*a[2] + f2*b[2]) / mix_pco2
         
-        mix_d13c, mix_r14c = ccu.c14_to_pmc( m_12c, m_13c, m_14c, 
-                                            self.s.stnd13C, self.s.stnd14C )
+        mix_d13c, mix_r14c = c14_to_pmc( m_12c, m_13c, m_14c, 
+                                         self.s.stnd13C, self.s.stnd14C )
         
         mix = {     'pCO2'          :   mix_pco2,
                     'd13C'          :   mix_d13c,
@@ -1100,30 +1102,30 @@ class Simulator(object):
                 self.settings['init_'+p] = getattr(G1, p)
                 
     @property
-    def stnd13C(self):
+    def stnd13C(self) ->float:
         if not hasattr(self, '_stnd13C'):
             self._stnd13C = self.reader.get_iso_stnd('13C')
         return self._stnd13C
     
     @property
-    def stnd14C(self):
+    def stnd14C(self) -> float:
         if not hasattr(self, '_stnd14C'):
             self._stnd14C = self.reader.get_iso_stnd('14C')
         return self._stnd14C
     
     @property
-    def stnd18O(self):
+    def stnd18O(self) -> float:
         if not hasattr(self, '_stnd18O'):
             self._stnd18O = self.reader.get_iso_stnd('18O')
         return self._stnd18O
     
     @property
-    def stnd44Ca(self):
+    def stnd44Ca(self) -> float:
         if not hasattr(self, '_stnd44Ca'):
             self._stnd44Ca = self.reader.get_iso_stnd('44Ca')
         return self._stnd44Ca
        
-    def _get_selected_output(self):
+    def _get_selected_output(self) -> Dict:
         """Get results from most recent Iphreeqc step. 
         
         Model parameters returned depend on SELECTED_OUTPUT. Model-essential 
@@ -1151,9 +1153,9 @@ class Simulator(object):
         # comparison with Fohlmeister et al. (2011).
         new = []
         for c13,c14 in zip(out['I_R(13C)'], out['I_R(14C)']):
-            pmc = ccu.pmc_normalise(  R14C=c14,   
-                                      d13C=c13, 
-                                      stnd14C=self.stnd14C  )
+            pmc = pmc_normalise(  R14C=c14,   
+                                  d13C=c13, 
+                                  stnd14C=self.stnd14C  )
             new.append( pmc )
         out['I_R(14C)'] = new
         return out
@@ -1300,7 +1302,7 @@ class Simulator(object):
         self.desc_buffer = ""       # clear description buffer
         self.string_buffer = ""     # clear string buffer
         
-    def get(self, key):
+    def get(self, key: str):
         """Look up a specified value in the current model state.
         
         Looks up the given header as a key in the self.last_output dict,
@@ -1403,28 +1405,3 @@ class Simulator(object):
         ccu.PostProcessor(self) # perform offline calculations and processing
         
         return self.output
-        
-    def save_results(self, format='.pkl', filename='output'):
-        """Save model output to specified file and format.
-        
-        Files will be saved in the current directory.
-        
-        This method is provided for low-level access. Generally it is advisable
-        to run Cavecalc via forward_models.py and use the more powerful saving
-        functions of that module.
-        
-        Args:
-            format (str): '.csv', '.pkl' or '.mat'
-            directory (str): Save directory
-            filename (str): Save file name without extension. Not used for pkl.
-        """
-                
-        if 'csv' in format:
-            ccu.save_csv(self.output, '%s.csv' % filename)
-        elif 'pkl' in format:
-            ccu.save_pkl([self.output], 'results.pkl')
-            ccu.save_pkl([self.settings], 'settings.pkl')
-        elif 'mat' in format:
-            ccu.save_mat(self.output, '%s.mat' % filename)
-        else:
-            raise IOError("Unrecognised output format.")

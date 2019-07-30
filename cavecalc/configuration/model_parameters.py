@@ -70,9 +70,11 @@ class ModelParameter:
         self._validate(str(newValue))
         self._Value = str(newValue)
 
-    def to_dict(self):
-        return {f:v for f, v in vars(self) if '__' not in f}
-
+    def print_format(self):
+        d = {f:v for f, v in vars(self).items() if '__' not in f}
+        d['Value'] = d.pop('_Value')
+        return d
+        
     def _is_value_special_input(self) -> bool:
         return self._Value in self._split_allowed_strings()
 

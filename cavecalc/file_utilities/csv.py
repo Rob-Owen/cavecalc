@@ -1,5 +1,9 @@
 import csv
-from typing import List, Dict
+from typing import List, Dict, Tuple
+
+def sort_dictionary(input: Dict) -> Tuple[Tuple[str], Tuple]:
+    s = sorted([(k, v) for k, v in input.items()])
+    return tuple(zip(*s))
 
 def write_config_to_csv(settings: List[Dict[str, str]], filename: str) -> None:
     settings = sorted(settings, key = lambda d: d['Name'])
@@ -13,3 +17,16 @@ def read_config_from_csv(filename: str) -> List[Dict[str, str]]:
         rows = [r for r in csv.reader(csvfile, delimiter=',', quotechar="\"")]
     header_row, param_rows = rows[0], rows[1:]
     return [dict(zip(header_row, r)) for r in param_rows]
+
+def write_results_to_csv(results: Dict[str, List], filename: str):
+    keys, values = sort_dictionary(results)
+    with open(filename, 'x', newline='') as f:
+        dw = csv.DictWriter(f, keys)
+        dw.writeheader()
+        dw.writerows(zip(*values))
+
+def read_results_from_csv(filename: str) -> Dict[str, List]:
+    with open(filename, 'r') as csvfile:
+        rows = [r for r in csv.reader(csvfile, delimiter=',', quotechar="\"")]
+    header_row, param_rows = rows[0], rows[1:]
+    return dict(zip(header_row, zip(*param_rows)))
