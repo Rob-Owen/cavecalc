@@ -29,29 +29,6 @@ def run_a_model(config: RunConfig):
     r = sim.run()
     print("Model complete.")
     return r
-        
-def run_async(SO_list):
-    """Run multiple models in parallel.
-    
-    WARNING: Parallel processing may cause errors in some calculations. Use
-    only when absolutely necessary. run_linear() is recommended instead.
-    
-    Args:
-        SO_list: A list SettingsObjects, e.g. from a SettingsMaker
-    Returns:
-        A list of (r, id) tuples. r is the model results dict and id is the 
-        'id' parameter in the settings dict.
-    """
-    
-    s = SO_list
-    results = {}
-    pool = mp.Pool()
-    results = [pool.apply_async(run_a_model, (e.dict(), e.id)) for e in s]
-    pool.close()
-    pool.join()
-    r = [res.get() for res in results]
-    r2 = sorted(r, key=lambda tup: tup[1]) # sort by model id
-    return r2
     
 def run_linear(configs: List[RunConfig]):
     """Runs multiple models in sequence.
@@ -171,17 +148,11 @@ class ForwardModels:
             self.done_input = done_input
             self.done_results = done_results
     
-    def run_models(self, mode='Serial', **kwargs):
+    def run_models(self, **kwargs):
         """Run models for all parameter sets loaded into the object. Output is
-        addded to self.results as a list of (r, id) tuples. See run_linear and
-        run_async for method. Parallel mode is not currently functional (on
-        Windows at least).
+        addded to self.results as a list of (r, id) tuples.
         
         Args:
-            mode: 'Serial' (default) or 'Parallel'. Running models in parallel
-                  is faster but not recommended - results may be inaccurate, as
-                  Iphreeqc is not necessarily thread-safe in this 
-                  implementation.
         Returns:
             Nothing. Model results list is assigned to self.results. List 
             indices in self.results correspond to indices in self.self.input.
@@ -192,15 +163,8 @@ class ForwardModels:
         print("Models to run:\t%s" % len(self.input))
         try:
             os.chdir(self.output_dir)
-            if mode.capitalize() == 'Serial': # Run models in order
-                results = run_linear(self.input)
-            elif mode.capitalize() == 'Parallel': # Run models multithreaded
-                print("Warning: Parallel operation accuracy not guaranteed.")
-                results = run_async(self.input)
-            else:
-                raise ValueError("Mode not recognised. Use serial / parallel")
+            results = run_linear(self.input)
             self.results = results
-            
             
             # add re-used output, if any
             self.results.extend(self.done_results)
