@@ -23,19 +23,12 @@ from copy import deepcopy
 
 def run_a_model(config: RunConfig):
     """Run a single cavecalc model.
-    
-    Args:
-        SO (SettingsObject): A SettingsObject describing model input.
-    Returns:
-        (r, id) where r is the model results dict and id is the 'id' parameter
-        in settings. If the model raises an error, (None, id) is returned.
     """
     
-    i = SO.id
-    sim = ccv.Simulator(config, i)
+    sim = ccv.Simulator(config)
     r = sim.run()
-    print("Model %i complete." % i)
-    return (r, i)
+    print("Model complete.")
+    return r
         
 def run_async(SO_list):
     """Run multiple models in parallel.
