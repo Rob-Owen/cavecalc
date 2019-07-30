@@ -19,6 +19,7 @@ from typing import List
 import cavecalc.caves as ccv
 import cavecalc.util as ccu
 from cavecalc.configuration import RunConfig
+from cavecalc.file_utilities import *
 from copy import deepcopy
 
 def run_a_model(config: RunConfig):
@@ -34,7 +35,7 @@ def run_linear(configs: List[RunConfig]):
     """Runs multiple models in sequence.
     
     Args:
-        SO_list: A list SettingsObjects, e.g. from a SettingsMaker
+        configs: A list RunConfigs
     Returns:
         A list of (r, id) tuples. r is the model results dict and id is the 
         'id' parameter in the settings dict.
@@ -76,27 +77,19 @@ class ForwardModels:
         """Checks output directory for existing output and prompts the user
         to decide whether they want to use it or not."""
         
-        
-        def dict_find(SO, list_of_SOs):
-        
-            for i,s in enumerate(list_of_SOs):
-            
-                # check keys are equal
-                if SO.dict().keys() != s.dict().keys():
-                    continue
-                    
-                # check all values are equal
-                equal = True
-                for k,v in SO.dict().items():
-                    if v != s.dict()[k]:
-                        equal = False
-                if equal:
-                    return i
-            return None 
-        
+        prev_settings = [f for f in os.listdir(self.output_dir) if f.endswith('settings.csv')]
+
+
+        for s in prev_settings:
+            try:
+                settings = RunConfig.from_file(f.name)
+                if self.input
+#### WIP
+
+
         try:
-            with open(os.path.join(self.output_dir, 'settings.pkl'), 'rb') as f:
-                prev_input = pickle.load(f)
+            
+            results = read_results_from_csv(os.path.join(self.output_dir, 'results.csv'))
                 
             with open(os.path.join(self.output_dir, 'results.pkl'), 'rb') as f:
                 prev_results = pickle.load(f)
