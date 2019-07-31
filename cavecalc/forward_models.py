@@ -25,9 +25,7 @@ from copy import deepcopy
 def run_a_model(config: RunConfig):
     """Run a single cavecalc model.
     """
-    
-    sim = ccv.Simulator(config)
-    r = sim.run()
+    r = ccv.Simulator(config).run()
     print("Model complete.")
     return r
     
@@ -65,7 +63,7 @@ class ForwardModels:
         self.done_input = []
         self.done_results = []
         
-        self.input = list(RunConfig.generate_suite(**settings))
+        self.input: List[RunConfig] = list(RunConfig.generate_suite(**settings))
 
         if output_dir:
             if not os.path.isdir(output_dir): 
@@ -77,15 +75,16 @@ class ForwardModels:
         """Checks output directory for existing output and prompts the user
         to decide whether they want to use it or not."""
         
-        prev_settings = [f for f in os.listdir(self.output_dir) if f.endswith('settings.csv')]
+        # find previous save files in output directory
+        try:
+            fs = (f for f in os.listdir(self.output_dir) if f.endswith('settings.csv'))
+            prev_settings = (RunConfig.from_file(f) for f in fs)
+            self.done_input.extend(s for s in prev_settings if s in self.input)
 
-
-        for s in prev_settings:
-            try:
-                settings = RunConfig.from_file(f.name)
-                if self.input
-#### WIP
-
+            fs = (f for f in os.listdir(self.output_dir if f.endswith('results.csv')))
+        except:
+            print("Failed to load existing files - skipping.")
+            return
 
         try:
             
